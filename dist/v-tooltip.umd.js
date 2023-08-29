@@ -2,45 +2,62 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = global || self, factory(global['v-tooltip'] = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
-  function _typeof(obj) {
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function (r) {
+        return Object.getOwnPropertyDescriptor(e, r).enumerable;
+      })), t.push.apply(t, o);
     }
-
-    return _typeof(obj);
+    return t;
   }
+  function _objectSpread2(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), !0).forEach(function (r) {
+        _defineProperty(e, r, t[r]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) {
+        Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
+      });
+    }
+    return e;
+  }
+  function _typeof(o) {
+    "@babel/helpers - typeof";
 
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof(o);
+  }
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
     }
   }
-
   function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
     return Constructor;
   }
-
   function _defineProperty(obj, key, value) {
+    key = _toPropertyKey(key);
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -51,32 +68,26 @@
     } else {
       obj[key] = value;
     }
-
     return obj;
   }
-
-  function _objectSpread(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-      var ownKeys = Object.keys(source);
-
-      if (typeof Object.getOwnPropertySymbols === 'function') {
-        ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-        }));
-      }
-
-      ownKeys.forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
+  function _toPrimitive(input, hint) {
+    if (typeof input !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (typeof res !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
     }
-
-    return target;
+    return (hint === "string" ? String : Number)(input);
+  }
+  function _toPropertyKey(arg) {
+    var key = _toPrimitive(arg, "string");
+    return typeof key === "symbol" ? key : String(key);
   }
 
   /**!
    * @fileOverview Kickass library to create and place poppers near their reference elements.
-   * @version 1.15.0
+   * @version 1.16.1
    * @license
    * Copyright (c) 2016 Federico Zivolo and contributors
    *
@@ -98,16 +109,17 @@
    * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    * SOFTWARE.
    */
-  var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+  var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined' && typeof navigator !== 'undefined';
 
-  var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
-  var timeoutDuration = 0;
-  for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
-    if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
-      timeoutDuration = 1;
-      break;
+  var timeoutDuration = function () {
+    var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
+    for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
+      if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
+        return 1;
+      }
     }
-  }
+    return 0;
+  }();
 
   function microtaskDebounce(fn) {
     var called = false;
@@ -225,6 +237,17 @@
     }
 
     return getScrollParent(getParentNode(element));
+  }
+
+  /**
+   * Returns the reference node of the reference object, or the reference object itself.
+   * @method
+   * @memberof Popper.Utils
+   * @param {Element|Object} reference - the reference element (the popper will be relative to this)
+   * @returns {Element} parent
+   */
+  function getReferenceNode(reference) {
+    return reference && reference.referenceNode ? reference.referenceNode : reference;
   }
 
   var isIE11 = isBrowser && !!(window.MSInputMethodContext && document.documentMode);
@@ -410,7 +433,7 @@
     var sideA = axis === 'x' ? 'Left' : 'Top';
     var sideB = sideA === 'Left' ? 'Right' : 'Bottom';
 
-    return parseFloat(styles['border' + sideA + 'Width'], 10) + parseFloat(styles['border' + sideB + 'Width'], 10);
+    return parseFloat(styles['border' + sideA + 'Width']) + parseFloat(styles['border' + sideB + 'Width']);
   }
 
   function getSize(axis, body, html, computedStyle) {
@@ -535,8 +558,8 @@
 
     // subtract scrollbar size from sizes
     var sizes = element.nodeName === 'HTML' ? getWindowSizes(element.ownerDocument) : {};
-    var width = sizes.width || element.clientWidth || result.right - result.left;
-    var height = sizes.height || element.clientHeight || result.bottom - result.top;
+    var width = sizes.width || element.clientWidth || result.width;
+    var height = sizes.height || element.clientHeight || result.height;
 
     var horizScrollbar = element.offsetWidth - width;
     var vertScrollbar = element.offsetHeight - height;
@@ -565,8 +588,8 @@
     var scrollParent = getScrollParent(children);
 
     var styles = getStyleComputedProperty(parent);
-    var borderTopWidth = parseFloat(styles.borderTopWidth, 10);
-    var borderLeftWidth = parseFloat(styles.borderLeftWidth, 10);
+    var borderTopWidth = parseFloat(styles.borderTopWidth);
+    var borderLeftWidth = parseFloat(styles.borderLeftWidth);
 
     // In cases where the parent is fixed, we must ignore negative scroll in offset calc
     if (fixedPosition && isHTML) {
@@ -587,8 +610,8 @@
     // differently when margins are applied to it. The margins are included in
     // the box of the documentElement, in the other cases not.
     if (!isIE10 && isHTML) {
-      var marginTop = parseFloat(styles.marginTop, 10);
-      var marginLeft = parseFloat(styles.marginLeft, 10);
+      var marginTop = parseFloat(styles.marginTop);
+      var marginLeft = parseFloat(styles.marginLeft);
 
       offsets.top -= borderTopWidth - marginTop;
       offsets.bottom -= borderTopWidth - marginTop;
@@ -688,7 +711,7 @@
     // NOTE: 1 DOM access here
 
     var boundaries = { top: 0, left: 0 };
-    var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+    var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
 
     // Handle viewport case
     if (boundariesElement === 'viewport') {
@@ -816,7 +839,7 @@
   function getReferenceOffsets(state, popper, reference) {
     var fixedPosition = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
-    var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+    var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
     return getOffsetRectRelativeToArbitraryNode(reference, commonOffsetParent, fixedPosition);
   }
 
@@ -1078,7 +1101,7 @@
 
     this.disableEventListeners();
 
-    // remove the popper if user explicity asked for the deletion on destroy
+    // remove the popper if user explicitly asked for the deletion on destroy
     // do not use `remove` because IE11 doesn't support it
     if (this.options.removeOnDestroy) {
       this.popper.parentNode.removeChild(this.popper);
@@ -1527,8 +1550,8 @@
     // Compute the sideValue using the updated popper offsets
     // take popper margin in account because we don't have this info available
     var css = getStyleComputedProperty(data.instance.popper);
-    var popperMarginSide = parseFloat(css['margin' + sideCapitalized], 10);
-    var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width'], 10);
+    var popperMarginSide = parseFloat(css['margin' + sideCapitalized]);
+    var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width']);
     var sideValue = center - data.offsets.popper[side] - popperMarginSide - popperBorderSide;
 
     // prevent arrowElement from being placed not contiguously to its popper
@@ -2677,18 +2700,16 @@
   Popper.Defaults = Defaults;
 
   var SVGAnimatedString = function SVGAnimatedString() {};
-
   if (typeof window !== 'undefined') {
     SVGAnimatedString = window.SVGAnimatedString;
   }
-
   function convertToArray(value) {
     if (typeof value === 'string') {
       value = value.split(' ');
     }
-
     return value;
   }
+
   /**
    * Add classes to an element.
    * This method checks to ensure that the classes don't already exist before adding them.
@@ -2696,29 +2717,26 @@
    * @param {object} el - The element to add the classes to.
    * @param {classes} string - List of space separated classes to be added to the element.
    */
-
   function addClasses(el, classes) {
     var newClasses = convertToArray(classes);
     var classList;
-
     if (el.className instanceof SVGAnimatedString) {
       classList = convertToArray(el.className.baseVal);
     } else {
       classList = convertToArray(el.className);
     }
-
     newClasses.forEach(function (newClass) {
       if (classList.indexOf(newClass) === -1) {
         classList.push(newClass);
       }
     });
-
     if (el instanceof SVGElement) {
       el.setAttribute('class', classList.join(' '));
     } else {
       el.className = classList.join(' ');
     }
   }
+
   /**
    * Remove classes from an element.
    * It uses el.className rather than classList in order to be IE friendly.
@@ -2726,25 +2744,20 @@
    * @param {any} el The element to remove the classes from.
    * @param {any} classes List of space separated classes to be removed from the element.
    */
-
   function removeClasses(el, classes) {
     var newClasses = convertToArray(classes);
     var classList;
-
     if (el.className instanceof SVGAnimatedString) {
       classList = convertToArray(el.className.baseVal);
     } else {
       classList = convertToArray(el.className);
     }
-
     newClasses.forEach(function (newClass) {
       var index = classList.indexOf(newClass);
-
       if (index !== -1) {
         classList.splice(index, 1);
       }
     });
-
     if (el instanceof SVGElement) {
       el.setAttribute('class', classList.join(' '));
     } else {
@@ -2752,10 +2765,8 @@
     }
   }
   var supportsPassive = false;
-
   if (typeof window !== 'undefined') {
     supportsPassive = false;
-
     try {
       var opts = Object.defineProperty({}, 'passive', {
         get: function get() {
@@ -2777,10 +2788,7 @@
     offset: 0
   };
   var openTooltips = [];
-
-  var Tooltip =
-  /*#__PURE__*/
-  function () {
+  var Tooltip = /*#__PURE__*/function () {
     /**
      * Create a new Tooltip.js instance
      * @class Tooltip
@@ -2816,49 +2824,48 @@
      */
     function Tooltip(_reference, _options) {
       var _this = this;
-
       _classCallCheck(this, Tooltip);
-
+      //
+      // Private methods
+      //
       _defineProperty(this, "_events", []);
-
       _defineProperty(this, "_setTooltipNodeEvent", function (evt, reference, delay, options) {
         var relatedreference = evt.relatedreference || evt.toElement || evt.relatedTarget;
-
         var callback = function callback(evt2) {
-          var relatedreference2 = evt2.relatedreference || evt2.toElement || evt2.relatedTarget; // Remove event listener after call
+          var relatedreference2 = evt2.relatedreference || evt2.toElement || evt2.relatedTarget;
 
-          _this._tooltipNode.removeEventListener(evt.type, callback); // If the new reference is not the reference element
+          // Remove event listener after call
+          _this._tooltipNode.removeEventListener(evt.type, callback);
 
-
+          // If the new reference is not the reference element
           if (!reference.contains(relatedreference2)) {
             // Schedule to hide tooltip
             _this._scheduleHide(reference, options.delay, options, evt2);
           }
         };
-
         if (_this._tooltipNode.contains(relatedreference)) {
           // listen to mouseleave on the tooltip element to be able to hide the tooltip
           _this._tooltipNode.addEventListener(evt.type, callback);
-
           return true;
         }
-
         return false;
       });
-
       // apply user options over default ones
-      _options = _objectSpread({}, DEFAULT_OPTIONS, _options);
+      _options = _objectSpread2(_objectSpread2({}, DEFAULT_OPTIONS), _options);
       _reference.jquery && (_reference = _reference[0]);
       this.show = this.show.bind(this);
-      this.hide = this.hide.bind(this); // cache reference and options
+      this.hide = this.hide.bind(this);
 
+      // cache reference and options
       this.reference = _reference;
-      this.options = _options; // set initial state
+      this.options = _options;
 
+      // set initial state
       this._isOpen = false;
-
       this._init();
-    } //
+    }
+
+    //
     // Public methods
     //
 
@@ -2868,41 +2875,39 @@
      * @method Tooltip#show
      * @memberof Tooltip
      */
-
-
     _createClass(Tooltip, [{
       key: "show",
       value: function show() {
         this._show(this.reference, this.options);
       }
+
       /**
        * Hides an element’s tooltip. This is considered a “manual” triggering of the tooltip.
        * @method Tooltip#hide
        * @memberof Tooltip
        */
-
     }, {
       key: "hide",
       value: function hide() {
         this._hide();
       }
+
       /**
        * Hides and destroys an element’s tooltip.
        * @method Tooltip#dispose
        * @memberof Tooltip
        */
-
     }, {
       key: "dispose",
       value: function dispose() {
         this._dispose();
       }
+
       /**
        * Toggles an element’s tooltip. This is considered a “manual” triggering of the tooltip.
        * @method Tooltip#toggle
        * @memberof Tooltip
        */
-
     }, {
       key: "toggle",
       value: function toggle() {
@@ -2921,7 +2926,6 @@
       key: "setContent",
       value: function setContent(content) {
         this.options.title = content;
-
         if (this._tooltipNode) {
           this._setContent(content, this.options);
         }
@@ -2931,35 +2935,27 @@
       value: function setOptions(options) {
         var classesUpdated = false;
         var classes = options && options.classes || directive.options.defaultClass;
-
         if (this._classes !== classes) {
           this.setClasses(classes);
           classesUpdated = true;
         }
-
         options = getOptions(options);
         var needPopperUpdate = false;
         var needRestart = false;
-
         if (this.options.offset !== options.offset || this.options.placement !== options.placement) {
           needPopperUpdate = true;
         }
-
         if (this.options.template !== options.template || this.options.trigger !== options.trigger || this.options.container !== options.container || classesUpdated) {
           needRestart = true;
         }
-
         for (var key in options) {
           this.options[key] = options[key];
         }
-
         if (this._tooltipNode) {
           if (needRestart) {
             var isOpen = this._isOpen;
             this.dispose();
-
             this._init();
-
             if (isOpen) {
               this.show();
             }
@@ -2967,10 +2963,7 @@
             this.popperInstance.update();
           }
         }
-      } //
-      // Private methods
-      //
-
+      }
     }, {
       key: "_init",
       value: function _init() {
@@ -2980,15 +2973,17 @@
         this._enableDocumentTouch = events.indexOf('manual') === -1;
         events = events.filter(function (trigger) {
           return ['click', 'hover', 'focus'].indexOf(trigger) !== -1;
-        }); // set event listeners
+        });
 
-        this._setEventListeners(this.reference, events, this.options); // title attribute
+        // set event listeners
+        this._setEventListeners(this.reference, events, this.options);
 
-
+        // title attribute
         this.$_originalTitle = this.reference.getAttribute('title');
         this.reference.removeAttribute('title');
         this.reference.setAttribute('data-original-title', this.$_originalTitle);
       }
+
       /**
        * Creates a new tooltip node
        * @memberof Tooltip
@@ -2999,36 +2994,34 @@
        * @param {Boolean} allowHtml
        * @return {HTMLelement} tooltipNode
        */
-
     }, {
       key: "_create",
       value: function _create(reference, template) {
         // create tooltip element
         var tooltipGenerator = window.document.createElement('div');
         tooltipGenerator.innerHTML = template.trim();
-        var tooltipNode = tooltipGenerator.childNodes[0]; // add unique ID to our tooltip (needed for accessibility reasons)
+        var tooltipNode = tooltipGenerator.childNodes[0];
 
-        tooltipNode.id = "tooltip_".concat(Math.random().toString(36).substr(2, 10)); // Initially hide the tooltip
+        // add unique ID to our tooltip (needed for accessibility reasons)
+        tooltipNode.id = "tooltip_".concat(Math.random().toString(36).substr(2, 10));
+
+        // Initially hide the tooltip
         // The attribute will be switched in a next frame so
         // CSS transitions can play
-
         tooltipNode.setAttribute('aria-hidden', 'true');
-
         if (this.options.autoHide && this.options.trigger.indexOf('hover') !== -1) {
           tooltipNode.addEventListener('mouseenter', this.hide);
           tooltipNode.addEventListener('click', this.hide);
-        } // return the generated tooltip node
+        }
 
-
+        // return the generated tooltip node
         return tooltipNode;
       }
     }, {
       key: "_setContent",
       value: function _setContent(content, options) {
         var _this2 = this;
-
         this.asyncContent = false;
-
         this._applyContent(content, options).then(function () {
           _this2.popperInstance.update();
         });
@@ -3037,34 +3030,28 @@
       key: "_applyContent",
       value: function _applyContent(title, options) {
         var _this3 = this;
-
         return new Promise(function (resolve, reject) {
           var allowHtml = options.html;
           var rootNode = _this3._tooltipNode;
           if (!rootNode) return;
           var titleNode = rootNode.querySelector(_this3.options.innerSelector);
-
           if (title.nodeType === 1) {
             // if title is a node, append it only if allowHtml is true
             if (allowHtml) {
               while (titleNode.firstChild) {
                 titleNode.removeChild(titleNode.firstChild);
               }
-
               titleNode.appendChild(title);
             }
           } else if (typeof title === 'function') {
             // if title is a function, call it and set innerText or innerHtml depending by `allowHtml` value
             var result = title();
-
             if (result && typeof result.then === 'function') {
               _this3.asyncContent = true;
               options.loadingClass && addClasses(rootNode, options.loadingClass);
-
               if (options.loadingContent) {
                 _this3._applyContent(options.loadingContent, options);
               }
-
               result.then(function (asyncResult) {
                 options.loadingClass && removeClasses(rootNode, options.loadingClass);
                 return _this3._applyContent(asyncResult, options);
@@ -3072,13 +3059,11 @@
             } else {
               _this3._applyContent(result, options).then(resolve).catch(reject);
             }
-
             return;
           } else {
             // if it's just a simple text, set innerText or innerHtml depending by `allowHtml` value
             allowHtml ? titleNode.innerHTML = title : titleNode.innerText = title;
           }
-
           resolve();
         });
       }
@@ -3086,26 +3071,21 @@
       key: "_show",
       value: function _show(reference, options) {
         if (options && typeof options.container === 'string') {
-          var container = document.querySelector(options.container);
+          var container = this.options.rootNode.querySelector(options.container);
           if (!container) return;
         }
-
         clearTimeout(this._disposeTimer);
         options = Object.assign({}, options);
         delete options.offset;
         var updateClasses = true;
-
         if (this._tooltipNode) {
           addClasses(this._tooltipNode, this._classes);
           updateClasses = false;
         }
-
         var result = this._ensureShown(reference, options);
-
         if (updateClasses && this._tooltipNode) {
           addClasses(this._tooltipNode, this._classes);
         }
-
         addClasses(reference, ['v-tooltip-open']);
         return result;
       }
@@ -3113,74 +3093,65 @@
       key: "_ensureShown",
       value: function _ensureShown(reference, options) {
         var _this4 = this;
-
         // don't show if it's already visible
         if (this._isOpen) {
           return this;
         }
-
         this._isOpen = true;
-        openTooltips.push(this); // if the tooltipNode already exists, just show it
+        openTooltips.push(this);
 
+        // if the tooltipNode already exists, just show it
         if (this._tooltipNode) {
           this._tooltipNode.style.display = '';
-
           this._tooltipNode.setAttribute('aria-hidden', 'false');
-
           this.popperInstance.enableEventListeners();
           this.popperInstance.update();
-
           if (this.asyncContent) {
             this._setContent(options.title, options);
           }
-
           return this;
-        } // get title
+        }
 
+        // get title
+        var title = reference.getAttribute('title') || options.title;
 
-        var title = reference.getAttribute('title') || options.title; // don't show tooltip if no title is defined
-
+        // don't show tooltip if no title is defined
         if (!title) {
           return this;
-        } // create tooltip node
+        }
 
-
+        // create tooltip node
         var tooltipNode = this._create(reference, options.template);
+        this._tooltipNode = tooltipNode;
 
-        this._tooltipNode = tooltipNode; // Add `aria-describedby` to our reference element for accessibility reasons
+        // Add `aria-describedby` to our reference element for accessibility reasons
+        reference.setAttribute('aria-describedby', tooltipNode.id);
 
-        reference.setAttribute('aria-describedby', tooltipNode.id); // append tooltip to container
-
+        // append tooltip to container
         var container = this._findContainer(options.container, reference);
-
         this._append(tooltipNode, container);
-
-        var popperOptions = _objectSpread({}, options.popperOptions, {
+        var popperOptions = _objectSpread2(_objectSpread2({}, options.popperOptions), {}, {
           placement: options.placement
         });
-
-        popperOptions.modifiers = _objectSpread({}, popperOptions.modifiers, {
+        popperOptions.modifiers = _objectSpread2(_objectSpread2({}, popperOptions.modifiers), {}, {
           arrow: {
             element: this.options.arrowSelector
           }
         });
-
         if (options.boundariesElement) {
           popperOptions.modifiers.preventOverflow = {
             boundariesElement: options.boundariesElement
           };
         }
-
         this.popperInstance = new Popper(reference, tooltipNode, popperOptions);
+        this._setContent(title, options);
 
-        this._setContent(title, options); // Fix position
-
-
+        // Fix position
         requestAnimationFrame(function () {
           if (!_this4._isDisposed && _this4.popperInstance) {
-            _this4.popperInstance.update(); // Show the tooltip
+            _this4.popperInstance.update();
 
-
+            // Show the tooltip
             requestAnimationFrame(function () {
               if (!_this4._isDisposed) {
                 _this4._isOpen && tooltipNode.setAttribute('aria-hidden', 'false');
@@ -3198,49 +3169,38 @@
       key: "_noLongerOpen",
       value: function _noLongerOpen() {
         var index = openTooltips.indexOf(this);
-
         if (index !== -1) {
           openTooltips.splice(index, 1);
         }
       }
     }, {
       key: "_hide",
-      value: function _hide()
-      /* reference, options */
-      {
+      value: function _hide( /* reference, options */
+      ) {
         var _this5 = this;
-
         // don't hide if it's already hidden
         if (!this._isOpen) {
           return this;
         }
-
         this._isOpen = false;
+        this._noLongerOpen();
 
-        this._noLongerOpen(); // hide tooltipNode
-
-
+        // hide tooltipNode
         this._tooltipNode.style.display = 'none';
-
         this._tooltipNode.setAttribute('aria-hidden', 'true');
-
         this.popperInstance.disableEventListeners();
         clearTimeout(this._disposeTimer);
         var disposeTime = directive.options.disposeTimeout;
-
         if (disposeTime !== null) {
           this._disposeTimer = setTimeout(function () {
             if (_this5._tooltipNode) {
               _this5._tooltipNode.removeEventListener('mouseenter', _this5.hide);
-
-              _this5._tooltipNode.removeEventListener('click', _this5.hide); // Don't remove popper instance, just the HTML element
-
-
+              _this5._tooltipNode.removeEventListener('click', _this5.hide);
+              // Don't remove popper instance, just the HTML element
               _this5._removeTooltipNode();
             }
           }, disposeTime);
         }
-
         removeClasses(this.reference, ['v-tooltip-open']);
         return this;
       }
@@ -3249,53 +3209,44 @@
       value: function _removeTooltipNode() {
         if (!this._tooltipNode) return;
         var parentNode = this._tooltipNode.parentNode;
-
         if (parentNode) {
           parentNode.removeChild(this._tooltipNode);
           this.reference.removeAttribute('aria-describedby');
         }
-
         this._tooltipNode = null;
       }
     }, {
       key: "_dispose",
       value: function _dispose() {
         var _this6 = this;
-
         this._isDisposed = true;
         this.reference.removeAttribute('data-original-title');
-
         if (this.$_originalTitle) {
           this.reference.setAttribute('title', this.$_originalTitle);
-        } // remove event listeners first to prevent any unexpected behaviour
+        }
 
-
+        // remove event listeners first to prevent any unexpected behaviour
         this._events.forEach(function (_ref) {
           var func = _ref.func,
-              event = _ref.event;
-
+            event = _ref.event;
           _this6.reference.removeEventListener(event, func);
         });
-
         this._events = [];
-
         if (this._tooltipNode) {
           this._hide();
-
           this._tooltipNode.removeEventListener('mouseenter', this.hide);
+          this._tooltipNode.removeEventListener('click', this.hide);
 
-          this._tooltipNode.removeEventListener('click', this.hide); // destroy instance
+          // destroy instance
+          this.popperInstance.destroy();
 
-
-          this.popperInstance.destroy(); // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
-
+          // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
           if (!this.popperInstance.options.removeOnDestroy) {
             this._removeTooltipNode();
           }
         } else {
           this._noLongerOpen();
         }
-
         return this;
       }
     }, {
@@ -3303,14 +3254,14 @@
       value: function _findContainer(container, reference) {
         // if container is a query, get the relative element
         if (typeof container === 'string') {
-          container = window.document.querySelector(container);
+          container = this.options.rootNode.querySelector(container);
         } else if (container === false) {
           // if container is `false`, set it to reference parent
           container = reference.parentNode;
         }
-
         return container;
       }
+
       /**
        * Append tooltip to container
        * @memberof Tooltip
@@ -3318,7 +3269,6 @@
        * @param {HTMLElement} tooltip
        * @param {HTMLElement|String|false} container
        */
-
     }, {
       key: "_append",
       value: function _append(tooltipNode, container) {
@@ -3328,7 +3278,6 @@
       key: "_setEventListeners",
       value: function _setEventListeners(reference, events, options) {
         var _this7 = this;
-
         var directEvents = [];
         var oppositeEvents = [];
         events.forEach(function (event) {
@@ -3338,53 +3287,46 @@
               oppositeEvents.push('mouseleave');
               if (_this7.options.hideOnTargetClick) oppositeEvents.push('click');
               break;
-
             case 'focus':
               directEvents.push('focus');
               oppositeEvents.push('blur');
               if (_this7.options.hideOnTargetClick) oppositeEvents.push('click');
               break;
-
             case 'click':
               directEvents.push('click');
               oppositeEvents.push('click');
               break;
           }
-        }); // schedule show tooltip
+        });
 
+        // schedule show tooltip
         directEvents.forEach(function (event) {
           var func = function func(evt) {
             if (_this7._isOpen === true) {
               return;
             }
-
             evt.usedByTooltip = true;
-
             _this7._scheduleShow(reference, options.delay, options, evt);
           };
-
           _this7._events.push({
             event: event,
             func: func
           });
-
           reference.addEventListener(event, func);
-        }); // schedule hide tooltip
+        });
 
+        // schedule hide tooltip
         oppositeEvents.forEach(function (event) {
           var func = function func(evt) {
             if (evt.usedByTooltip === true) {
               return;
             }
-
             _this7._scheduleHide(reference, options.delay, options, evt);
           };
-
           _this7._events.push({
             event: event,
             func: func
           });
-
           reference.addEventListener(event, func);
         });
       }
@@ -3397,11 +3339,8 @@
       }
     }, {
       key: "_scheduleShow",
-      value: function _scheduleShow(reference, delay, options
-      /*, evt */
-      ) {
+      value: function _scheduleShow(reference, delay, options /*, evt */) {
         var _this8 = this;
-
         // defaults to 0
         var computedDelay = delay && delay.show || delay || 0;
         clearTimeout(this._scheduleTimer);
@@ -3413,7 +3352,6 @@
       key: "_scheduleHide",
       value: function _scheduleHide(reference, delay, options, evt) {
         var _this9 = this;
-
         // defaults to 0
         var computedDelay = delay && delay.hide || delay || 0;
         clearTimeout(this._scheduleTimer);
@@ -3421,31 +3359,27 @@
           if (_this9._isOpen === false) {
             return;
           }
-
-          if (!document.body.contains(_this9._tooltipNode)) {
+          if (!_this9.options.rootNode.contains(_this9._tooltipNode)) {
             return;
-          } // if we are hiding because of a mouseleave, we must check that the new
+          }
+
+          // if we are hiding because of a mouseleave, we must check that the new
           // reference isn't the tooltip, because in this case we don't want to hide it
-
-
           if (evt.type === 'mouseleave') {
-            var isSet = _this9._setTooltipNodeEvent(evt, reference, delay, options); // if we set the new event, don't hide the tooltip yet
+            var isSet = _this9._setTooltipNodeEvent(evt, reference, delay, options);
+
+            // if we set the new event, don't hide the tooltip yet
             // the new event will take care to hide it if necessary
-
-
             if (isSet) {
               return;
             }
           }
-
           _this9._hide(reference, options);
         }, computedDelay);
       }
     }]);
-
     return Tooltip;
   }(); // Hide tooltips on touch devices
-
   if (typeof document !== 'undefined') {
     document.addEventListener('touchstart', function (event) {
       for (var i = 0; i < openTooltips.length; i++) {
@@ -3456,6 +3390,7 @@
       capture: true
     } : true);
   }
+
   /**
    * Placement function, its context is the Tooltip instance.
    * @memberof Tooltip
@@ -3507,6 +3442,7 @@
     defaultLoadingClass: 'tooltip-loading',
     // Displayed when tooltip content is loading
     defaultLoadingContent: '...',
+    defaultRootNode: document.body,
     // Hide on mouseover tooltip
     autoHide: true,
     // Close tooltip on click on tooltip target?
@@ -3556,49 +3492,41 @@
       hideOnTargetClick: typeof options.hideOnTargetClick !== 'undefined' ? options.hideOnTargetClick : directive.options.defaultHideOnTargetClick,
       loadingClass: typeof options.loadingClass !== 'undefined' ? options.loadingClass : directive.options.defaultLoadingClass,
       loadingContent: typeof options.loadingContent !== 'undefined' ? options.loadingContent : directive.options.defaultLoadingContent,
-      popperOptions: _objectSpread({}, typeof options.popperOptions !== 'undefined' ? options.popperOptions : directive.options.defaultPopperOptions)
+      rootNode: typeof options.rootNode !== 'undefined' ? options.rootNode : directive.options.defaultRootNode,
+      popperOptions: _objectSpread2({}, typeof options.popperOptions !== 'undefined' ? options.popperOptions : directive.options.defaultPopperOptions)
     };
-
     if (result.offset) {
       var typeofOffset = _typeof(result.offset);
+      var offset = result.offset;
 
-      var offset = result.offset; // One value -> switch
-
+      // One value -> switch
       if (typeofOffset === 'number' || typeofOffset === 'string' && offset.indexOf(',') === -1) {
         offset = "0, ".concat(offset);
       }
-
       if (!result.popperOptions.modifiers) {
         result.popperOptions.modifiers = {};
       }
-
       result.popperOptions.modifiers.offset = {
         offset: offset
       };
     }
-
     if (result.trigger && result.trigger.indexOf('click') !== -1) {
       result.hideOnTargetClick = false;
     }
-
     return result;
   }
   function getPlacement(value, modifiers) {
     var placement = value.placement;
-
     for (var i = 0; i < positions.length; i++) {
       var pos = positions[i];
-
       if (modifiers[pos]) {
         placement = pos;
       }
     }
-
     return placement;
   }
   function getContent(value) {
     var type = _typeof(value);
-
     if (type === 'string') {
       return value;
     } else if (value && type === 'object') {
@@ -3611,17 +3539,16 @@
     var modifiers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var content = getContent(value);
     var classes = typeof value.classes !== 'undefined' ? value.classes : directive.options.defaultClass;
-
-    var opts = _objectSpread({
+    var opts = _objectSpread2({
       title: content
-    }, getOptions(_objectSpread({}, value, {
+    }, getOptions(_objectSpread2(_objectSpread2({}, value), {}, {
       placement: getPlacement(value, modifiers)
     })));
-
     var tooltip = el._tooltip = new Tooltip(el, opts);
     tooltip.setClasses(classes);
-    tooltip._vueEl = el; // Class on target
+    tooltip._vueEl = el;
 
+    // Class on target
     var targetClasses = typeof value.targetClasses !== 'undefined' ? value.targetClasses : directive.options.defaultTargetClass;
     el._tooltipTargetClasses = targetClasses;
     addClasses(el, targetClasses);
@@ -3630,11 +3557,9 @@
   function destroyTooltip(el) {
     if (el._tooltip) {
       el._tooltip.dispose();
-
       delete el._tooltip;
       delete el._tooltipOldShow;
     }
-
     if (el._tooltipTargetClasses) {
       removeClasses(el, el._tooltipTargetClasses);
       delete el._tooltipTargetClasses;
@@ -3642,28 +3567,26 @@
   }
   function bind(el, _ref) {
     var value = _ref.value,
-        oldValue = _ref.oldValue,
-        modifiers = _ref.modifiers;
+      oldValue = _ref.oldValue,
+      modifiers = _ref.modifiers;
     var content = getContent(value);
-
     if (!content || !state.enabled) {
       destroyTooltip(el);
     } else {
       var tooltip;
-
       if (el._tooltip) {
-        tooltip = el._tooltip; // Content
-
-        tooltip.setContent(content); // Options
-
-        tooltip.setOptions(_objectSpread({}, value, {
+        tooltip = el._tooltip;
+        // Content
+        tooltip.setContent(content);
+        // Options
+        tooltip.setOptions(_objectSpread2(_objectSpread2({}, value), {}, {
           placement: getPlacement(value, modifiers)
         }));
       } else {
         tooltip = createTooltip(el, value, modifiers);
-      } // Manual show
+      }
 
-
+      // Manual show
       if (typeof value.show !== 'undefined' && value.show !== el._tooltipOldShow) {
         el._tooltipOldShow = value.show;
         value.show ? tooltip.show() : tooltip.hide();
@@ -3685,20 +3608,17 @@
       passive: true
     } : false);
   }
-
   function removeListeners(el) {
     el.removeEventListener('click', onClick);
     el.removeEventListener('touchstart', onTouchStart);
     el.removeEventListener('touchend', onTouchEnd);
     el.removeEventListener('touchcancel', onTouchCancel);
   }
-
   function onClick(event) {
     var el = event.currentTarget;
     event.closePopover = !el.$_vclosepopover_touch;
     event.closeAllPopover = el.$_closePopoverModifiers && !!el.$_closePopoverModifiers.all;
   }
-
   function onTouchStart(event) {
     if (event.changedTouches.length === 1) {
       var el = event.currentTarget;
@@ -3709,11 +3629,9 @@
       el.addEventListener('touchcancel', onTouchCancel);
     }
   }
-
   function onTouchEnd(event) {
     var el = event.currentTarget;
     el.$_vclosepopover_touch = false;
-
     if (event.changedTouches.length === 1) {
       var touch = event.changedTouches[0];
       var firstTouch = el.$_vclosepopover_touchPoint;
@@ -3721,28 +3639,24 @@
       event.closeAllPopover = el.$_closePopoverModifiers && !!el.$_closePopoverModifiers.all;
     }
   }
-
   function onTouchCancel(event) {
     var el = event.currentTarget;
     el.$_vclosepopover_touch = false;
   }
-
   var vclosepopover = {
     bind: function bind(el, _ref) {
       var value = _ref.value,
-          modifiers = _ref.modifiers;
+        modifiers = _ref.modifiers;
       el.$_closePopoverModifiers = modifiers;
-
       if (typeof value === 'undefined' || value) {
         addListeners(el);
       }
     },
     update: function update(el, _ref2) {
       var value = _ref2.value,
-          oldValue = _ref2.oldValue,
-          modifiers = _ref2.modifiers;
+        oldValue = _ref2.oldValue,
+        modifiers = _ref2.modifiers;
       el.$_closePopoverModifiers = modifiers;
-
       if (value !== oldValue) {
         if (typeof value === 'undefined' || value) {
           addListeners(el);
@@ -3871,28 +3785,20 @@
 
   function getDefault(key) {
     var value = directive.options.popover[key];
-
     if (typeof value === 'undefined') {
       return directive.options[key];
     }
-
     return value;
   }
-
   var isIOS = false;
-
   if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
     isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   }
-
   var openPopovers = [];
-
   var Element = function Element() {};
-
   if (typeof window !== 'undefined') {
     Element = window.Element;
   }
-
   var script = {
     name: 'VPopover',
     components: {
@@ -4038,12 +3944,10 @@
           var popoverNode = this.$refs.popover;
           var reference = this.$refs.trigger;
           var container = this.$_findContainer(this.container, reference);
-
           if (!container) {
             console.warn('No container for popover', this);
             return;
           }
-
           container.appendChild(popoverNode);
           this.popperInstance.scheduleUpdate();
         }
@@ -4054,7 +3958,6 @@
       },
       placement: function placement(val) {
         var _this = this;
-
         this.$_updatePopper(function () {
           _this.popperInstance.options.placement = val;
         });
@@ -4076,7 +3979,6 @@
       var popoverNode = this.$refs.popover;
       popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode);
       this.$_init();
-
       if (this.open) {
         this.show();
       }
@@ -4090,18 +3992,15 @@
     methods: {
       show: function show() {
         var _this2 = this;
-
         var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            event = _ref2.event,
-            _ref2$skipDelay = _ref2.skipDelay,
-            _ref2$force = _ref2.force,
-            force = _ref2$force === void 0 ? false : _ref2$force;
-
+          event = _ref2.event,
+          _ref2$skipDelay = _ref2.skipDelay,
+          _ref2$force = _ref2.force,
+          force = _ref2$force === void 0 ? false : _ref2$force;
         if (force || !this.disabled) {
           this.$_scheduleShow(event);
           this.$emit('show');
         }
-
         this.$emit('update:open', true);
         this.$_beingShowed = true;
         requestAnimationFrame(function () {
@@ -4110,9 +4009,8 @@
       },
       hide: function hide() {
         var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            event = _ref3.event,
-            _ref3$skipDelay = _ref3.skipDelay;
-
+          event = _ref3.event,
+          _ref3$skipDelay = _ref3.skipDelay;
         this.$_scheduleHide(event);
         this.$emit('hide');
         this.$emit('update:open', false);
@@ -4123,16 +4021,15 @@
         this.hide({
           skipDelay: true
         });
-
         if (this.popperInstance) {
-          this.popperInstance.destroy(); // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
+          this.popperInstance.destroy();
 
+          // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
           if (!this.popperInstance.options.removeOnDestroy) {
             var popoverNode = this.$refs.popover;
             popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode);
           }
         }
-
         this.$_mounted = false;
         this.popperInstance = null;
         this.isOpen = false;
@@ -4145,82 +4042,69 @@
       },
       $_show: function $_show() {
         var _this3 = this;
-
         var reference = this.$refs.trigger;
         var popoverNode = this.$refs.popover;
-        clearTimeout(this.$_disposeTimer); // Already open
+        clearTimeout(this.$_disposeTimer);
 
+        // Already open
         if (this.isOpen) {
           return;
-        } // Popper is already initialized
+        }
 
-
+        // Popper is already initialized
         if (this.popperInstance) {
           this.isOpen = true;
           this.popperInstance.enableEventListeners();
           this.popperInstance.scheduleUpdate();
         }
-
         if (!this.$_mounted) {
           var container = this.$_findContainer(this.container, reference);
-
           if (!container) {
             console.warn('No container for popover', this);
             return;
           }
-
           container.appendChild(popoverNode);
           this.$_mounted = true;
         }
-
         if (!this.popperInstance) {
-          var popperOptions = _objectSpread({}, this.popperOptions, {
+          var popperOptions = _objectSpread2(_objectSpread2({}, this.popperOptions), {}, {
             placement: this.placement
           });
-
-          popperOptions.modifiers = _objectSpread({}, popperOptions.modifiers, {
-            arrow: _objectSpread({}, popperOptions.modifiers && popperOptions.modifiers.arrow, {
+          popperOptions.modifiers = _objectSpread2(_objectSpread2({}, popperOptions.modifiers), {}, {
+            arrow: _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.arrow), {}, {
               element: this.$refs.arrow
             })
           });
-
           if (this.offset) {
             var offset = this.$_getOffset();
-            popperOptions.modifiers.offset = _objectSpread({}, popperOptions.modifiers && popperOptions.modifiers.offset, {
+            popperOptions.modifiers.offset = _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.offset), {}, {
               offset: offset
             });
           }
-
           if (this.boundariesElement) {
-            popperOptions.modifiers.preventOverflow = _objectSpread({}, popperOptions.modifiers && popperOptions.modifiers.preventOverflow, {
+            popperOptions.modifiers.preventOverflow = _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.preventOverflow), {}, {
               boundariesElement: this.boundariesElement
             });
           }
+          this.popperInstance = new Popper(reference, popoverNode, popperOptions);
 
-          this.popperInstance = new Popper(reference, popoverNode, popperOptions); // Fix position
-
+          // Fix position
           requestAnimationFrame(function () {
             if (_this3.hidden) {
               _this3.hidden = false;
-
               _this3.$_hide();
-
               return;
             }
-
             if (!_this3.$_isDisposed && _this3.popperInstance) {
-              _this3.popperInstance.scheduleUpdate(); // Show the tooltip
+              _this3.popperInstance.scheduleUpdate();
 
-
+              // Show the tooltip
               requestAnimationFrame(function () {
                 if (_this3.hidden) {
                   _this3.hidden = false;
-
                   _this3.$_hide();
-
                   return;
                 }
-
                 if (!_this3.$_isDisposed) {
                   _this3.isOpen = true;
                 } else {
@@ -4232,52 +4116,39 @@
             }
           });
         }
-
         var openGroup = this.openGroup;
-
         if (openGroup) {
           var popover;
-
           for (var i = 0; i < openPopovers.length; i++) {
             popover = openPopovers[i];
-
             if (popover.openGroup !== openGroup) {
               popover.hide();
               popover.$emit('close-group');
             }
           }
         }
-
         openPopovers.push(this);
         this.$emit('apply-show');
       },
       $_hide: function $_hide() {
         var _this4 = this;
-
         // Already hidden
         if (!this.isOpen) {
           return;
         }
-
         var index = openPopovers.indexOf(this);
-
         if (index !== -1) {
           openPopovers.splice(index, 1);
         }
-
         this.isOpen = false;
-
         if (this.popperInstance) {
           this.popperInstance.disableEventListeners();
         }
-
         clearTimeout(this.$_disposeTimer);
         var disposeTime = directive.options.popover.disposeTimeout || directive.options.disposeTimeout;
-
         if (disposeTime !== null) {
           this.$_disposeTimer = setTimeout(function () {
             var popoverNode = _this4.$refs.popover;
-
             if (popoverNode) {
               // Don't remove popper instance, just the HTML element
               popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode);
@@ -4285,34 +4156,30 @@
             }
           }, disposeTime);
         }
-
         this.$emit('apply-hide');
       },
       $_findContainer: function $_findContainer(container, reference) {
         // if container is a query, get the relative element
         if (typeof container === 'string') {
-          container = window.document.querySelector(container);
+          container = directive.options.rootNode.querySelector(container);
         } else if (container === false) {
           // if container is `false`, set it to reference parent
           container = reference.parentNode;
         }
-
         return container;
       },
       $_getOffset: function $_getOffset() {
         var typeofOffset = _typeof(this.offset);
+        var offset = this.offset;
 
-        var offset = this.offset; // One value -> switch
-
+        // One value -> switch
         if (typeofOffset === 'number' || typeofOffset === 'string' && offset.indexOf(',') === -1) {
           offset = "0, ".concat(offset);
         }
-
         return offset;
       },
       $_addEventListeners: function $_addEventListeners() {
         var _this5 = this;
-
         var reference = this.$refs.trigger;
         var directEvents = [];
         var oppositeEvents = [];
@@ -4325,65 +4192,57 @@
               directEvents.push('mouseenter');
               oppositeEvents.push('mouseleave');
               break;
-
             case 'focus':
               directEvents.push('focus');
               oppositeEvents.push('blur');
               break;
-
             case 'click':
               directEvents.push('click');
               oppositeEvents.push('click');
               break;
           }
-        }); // schedule show tooltip
+        });
 
+        // schedule show tooltip
         directEvents.forEach(function (event) {
           var func = function func(event) {
             if (_this5.isOpen) {
               return;
             }
-
             event.usedByTooltip = true;
             !_this5.$_preventOpen && _this5.show({
               event: event
             });
             _this5.hidden = false;
           };
-
           _this5.$_events.push({
             event: event,
             func: func
           });
-
           reference.addEventListener(event, func);
-        }); // schedule hide tooltip
+        });
 
+        // schedule hide tooltip
         oppositeEvents.forEach(function (event) {
           var func = function func(event) {
             if (event.usedByTooltip) {
               return;
             }
-
             _this5.hide({
               event: event
             });
-
             _this5.hidden = true;
           };
-
           _this5.$_events.push({
             event: event,
             func: func
           });
-
           reference.addEventListener(event, func);
         });
       },
       $_scheduleShow: function $_scheduleShow() {
         var skipDelay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         clearTimeout(this.$_scheduleTimer);
-
         if (skipDelay) {
           this.$_show();
         } else {
@@ -4394,11 +4253,9 @@
       },
       $_scheduleHide: function $_scheduleHide() {
         var _this6 = this;
-
         var event = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
         var skipDelay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         clearTimeout(this.$_scheduleTimer);
-
         if (skipDelay) {
           this.$_hide();
         } else {
@@ -4407,36 +4264,35 @@
           this.$_scheduleTimer = setTimeout(function () {
             if (!_this6.isOpen) {
               return;
-            } // if we are hiding because of a mouseleave, we must check that the new
+            }
+
+            // if we are hiding because of a mouseleave, we must check that the new
             // reference isn't the tooltip, because in this case we don't want to hide it
-
-
             if (event && event.type === 'mouseleave') {
-              var isSet = _this6.$_setTooltipNodeEvent(event); // if we set the new event, don't hide the tooltip yet
+              var isSet = _this6.$_setTooltipNodeEvent(event);
+
+              // if we set the new event, don't hide the tooltip yet
               // the new event will take care to hide it if necessary
-
-
               if (isSet) {
                 return;
               }
             }
-
             _this6.$_hide();
           }, computedDelay);
         }
       },
       $_setTooltipNodeEvent: function $_setTooltipNodeEvent(event) {
         var _this7 = this;
-
         var reference = this.$refs.trigger;
         var popoverNode = this.$refs.popover;
         var relatedreference = event.relatedreference || event.toElement || event.relatedTarget;
-
         var callback = function callback(event2) {
-          var relatedreference2 = event2.relatedreference || event2.toElement || event2.relatedTarget; // Remove event listener after call
+          var relatedreference2 = event2.relatedreference || event2.toElement || event2.relatedTarget;
 
-          popoverNode.removeEventListener(event.type, callback); // If the new reference is not the reference element
+          // Remove event listener after call
+          popoverNode.removeEventListener(event.type, callback);
 
+          // If the new reference is not the reference element
           if (!reference.contains(relatedreference2)) {
             // Schedule to hide tooltip
             _this7.hide({
@@ -4444,20 +4300,18 @@
             });
           }
         };
-
         if (popoverNode.contains(relatedreference)) {
           // listen to mouseleave on the tooltip element to be able to hide the tooltip
           popoverNode.addEventListener(event.type, callback);
           return true;
         }
-
         return false;
       },
       $_removeEventListeners: function $_removeEventListeners() {
         var reference = this.$refs.trigger;
         this.$_events.forEach(function (_ref4) {
           var func = _ref4.func,
-              event = _ref4.event;
+            event = _ref4.event;
           reference.removeEventListener(event, func);
         });
         this.$_events = [];
@@ -4474,7 +4328,6 @@
           this.dispose();
           this.$_isDisposed = false;
           this.$_init();
-
           if (isOpen) {
             this.show({
               skipDelay: true,
@@ -4485,19 +4338,16 @@
       },
       $_handleGlobalClose: function $_handleGlobalClose(event) {
         var _this8 = this;
-
         var touch = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         if (this.$_beingShowed) return;
         this.hide({
           event: event
         });
-
         if (event.closePopover) {
           this.$emit('close-directive');
         } else {
           this.$emit('auto-hide');
         }
-
         if (touch) {
           this.$_preventOpen = true;
           setTimeout(function () {
@@ -4513,7 +4363,6 @@
       }
     }
   };
-
   if (typeof document !== 'undefined' && typeof window !== 'undefined') {
     if (isIOS) {
       document.addEventListener('touchend', handleGlobalTouchend, supportsPassive ? {
@@ -4524,21 +4373,16 @@
       window.addEventListener('click', handleGlobalClick, true);
     }
   }
-
   function handleGlobalClick(event) {
     handleGlobalClose(event);
   }
-
   function handleGlobalTouchend(event) {
     handleGlobalClose(event, true);
   }
-
   function handleGlobalClose(event) {
     var touch = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-    var _loop = function _loop(i) {
+    var _loop = function _loop() {
       var popover = openPopovers[i];
-
       if (popover.$refs.popover) {
         var contains = popover.$refs.popover.contains(event.target);
         requestAnimationFrame(function () {
@@ -4548,109 +4392,95 @@
         });
       }
     };
-
     // Delay so that close directive has time to set values
     for (var i = 0; i < openPopovers.length; i++) {
-      _loop(i);
+      _loop();
     }
   }
 
-  function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier
-  /* server only */
-  , shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
-    if (typeof shadowMode !== 'boolean') {
-      createInjectorSSR = createInjector;
-      createInjector = shadowMode;
-      shadowMode = false;
-    } // Vue.extend constructor export interop.
-
-
-    var options = typeof script === 'function' ? script.options : script; // render functions
-
-    if (template && template.render) {
-      options.render = template.render;
-      options.staticRenderFns = template.staticRenderFns;
-      options._compiled = true; // functional template
-
-      if (isFunctionalTemplate) {
-        options.functional = true;
+  function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier /* server only */, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
+      if (typeof shadowMode !== 'boolean') {
+          createInjectorSSR = createInjector;
+          createInjector = shadowMode;
+          shadowMode = false;
       }
-    } // scopedId
-
-
-    if (scopeId) {
-      options._scopeId = scopeId;
-    }
-
-    var hook;
-
-    if (moduleIdentifier) {
-      // server build
-      hook = function hook(context) {
-        // 2.3 injection
-        context = context || // cached call
-        this.$vnode && this.$vnode.ssrContext || // stateful
-        this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext; // functional
-        // 2.2 with runInNewContext: true
-
-        if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-          context = __VUE_SSR_CONTEXT__;
-        } // inject component styles
-
-
-        if (style) {
-          style.call(this, createInjectorSSR(context));
-        } // register component module identifier for async chunk inference
-
-
-        if (context && context._registeredComponents) {
-          context._registeredComponents.add(moduleIdentifier);
-        }
-      }; // used by ssr in case component is cached and beforeCreate
-      // never gets called
-
-
-      options._ssrRegister = hook;
-    } else if (style) {
-      hook = shadowMode ? function () {
-        style.call(this, createInjectorShadow(this.$root.$options.shadowRoot));
-      } : function (context) {
-        style.call(this, createInjector(context));
-      };
-    }
-
-    if (hook) {
-      if (options.functional) {
-        // register for functional component in vue file
-        var originalRender = options.render;
-
-        options.render = function renderWithStyleInjection(h, context) {
-          hook.call(context);
-          return originalRender(h, context);
-        };
-      } else {
-        // inject component registration as beforeCreate hook
-        var existing = options.beforeCreate;
-        options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+      // Vue.extend constructor export interop.
+      const options = typeof script === 'function' ? script.options : script;
+      // render functions
+      if (template && template.render) {
+          options.render = template.render;
+          options.staticRenderFns = template.staticRenderFns;
+          options._compiled = true;
+          // functional template
+          if (isFunctionalTemplate) {
+              options.functional = true;
+          }
       }
-    }
-
-    return script;
+      // scopedId
+      if (scopeId) {
+          options._scopeId = scopeId;
+      }
+      let hook;
+      if (moduleIdentifier) {
+          // server build
+          hook = function (context) {
+              // 2.3 injection
+              context =
+                  context || // cached call
+                      (this.$vnode && this.$vnode.ssrContext) || // stateful
+                      (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext); // functional
+              // 2.2 with runInNewContext: true
+              if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+                  context = __VUE_SSR_CONTEXT__;
+              }
+              // inject component styles
+              if (style) {
+                  style.call(this, createInjectorSSR(context));
+              }
+              // register component module identifier for async chunk inference
+              if (context && context._registeredComponents) {
+                  context._registeredComponents.add(moduleIdentifier);
+              }
+          };
+          // used by ssr in case component is cached and beforeCreate
+          // never gets called
+          options._ssrRegister = hook;
+      }
+      else if (style) {
+          hook = shadowMode
+              ? function (context) {
+                  style.call(this, createInjectorShadow(context, this.$root.$options.shadowRoot));
+              }
+              : function (context) {
+                  style.call(this, createInjector(context));
+              };
+      }
+      if (hook) {
+          if (options.functional) {
+              // register for functional component in vue file
+              const originalRender = options.render;
+              options.render = function renderWithStyleInjection(h, context) {
+                  hook.call(context);
+                  return originalRender(h, context);
+              };
+          }
+          else {
+              // inject component registration as beforeCreate hook
+              const existing = options.beforeCreate;
+              options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+          }
+      }
+      return script;
   }
-
-  var normalizeComponent_1 = normalizeComponent;
 
   /* script */
   var __vue_script__ = script;
-  /* template */
 
+  /* template */
   var __vue_render__ = function __vue_render__() {
     var _vm = this;
-
     var _h = _vm.$createElement;
-
     var _c = _vm._self._c || _h;
-
     return _c("div", {
       staticClass: "v-popover",
       class: _vm.cssClass
@@ -4680,7 +4510,6 @@
           if (!$event.type.indexOf("key") && _vm._k($event.keyCode, "esc", 27, $event.key, ["Esc", "Escape"])) {
             return null;
           }
-
           _vm.autoHide && _vm.hide();
         }
       }
@@ -4701,29 +4530,27 @@
       class: _vm.popoverArrowClass
     })])])]);
   };
-
   var __vue_staticRenderFns__ = [];
   __vue_render__._withStripped = true;
-  /* style */
 
+  /* style */
   var __vue_inject_styles__ = undefined;
   /* scoped */
-
   var __vue_scope_id__ = undefined;
   /* module identifier */
-
   var __vue_module_identifier__ = undefined;
   /* functional template */
-
   var __vue_is_functional_template__ = false;
   /* style inject */
 
   /* style inject SSR */
 
-  var Popover = normalizeComponent_1({
+  /* style inject shadow dom */
+
+  var __vue_component__ = /*#__PURE__*/normalizeComponent({
     render: __vue_render__,
     staticRenderFns: __vue_staticRenderFns__
-  }, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, undefined, undefined);
+  }, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, undefined, undefined);
 
   /**
    * Removes all key-value entries from the list cache.
@@ -5721,7 +5548,7 @@
 
   var _cloneBuffer = createCommonjsModule(function (module, exports) {
   /** Detect free variable `exports`. */
-  var freeExports = exports && !exports.nodeType && exports;
+  var freeExports =  exports && !exports.nodeType && exports;
 
   /** Detect free variable `module`. */
   var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
@@ -6121,7 +5948,7 @@
 
   var isBuffer_1 = createCommonjsModule(function (module, exports) {
   /** Detect free variable `exports`. */
-  var freeExports = exports && !exports.nodeType && exports;
+  var freeExports =  exports && !exports.nodeType && exports;
 
   /** Detect free variable `module`. */
   var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
@@ -6290,7 +6117,7 @@
 
   var _nodeUtil = createCommonjsModule(function (module, exports) {
   /** Detect free variable `exports`. */
-  var freeExports = exports && !exports.nodeType && exports;
+  var freeExports =  exports && !exports.nodeType && exports;
 
   /** Detect free variable `module`. */
   var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
@@ -6344,7 +6171,7 @@
   var isTypedArray_1 = isTypedArray;
 
   /**
-   * Gets the value at `key`, unless `key` is "__proto__".
+   * Gets the value at `key`, unless `key` is "__proto__" or "constructor".
    *
    * @private
    * @param {Object} object The object to query.
@@ -6352,6 +6179,10 @@
    * @returns {*} Returns the property value.
    */
   function safeGet(object, key) {
+    if (key === 'constructor' && typeof object[key] === 'function') {
+      return;
+    }
+
     if (key == '__proto__') {
       return;
     }
@@ -6720,8 +6551,8 @@
       return;
     }
     _baseFor(source, function(srcValue, key) {
+      stack || (stack = new _Stack);
       if (isObject_1(srcValue)) {
-        stack || (stack = new _Stack);
         _baseMergeDeep(object, source, key, srcIndex, baseMerge, customizer, stack);
       }
       else {
@@ -7053,8 +6884,8 @@
     }
   }
 
-  var css = ".resize-observer[data-v-b329ee4c]{position:absolute;top:0;left:0;z-index:-1;width:100%;height:100%;border:none;background-color:transparent;pointer-events:none;display:block;overflow:hidden;opacity:0}.resize-observer[data-v-b329ee4c] object{display:block;position:absolute;top:0;left:0;height:100%;width:100%;overflow:hidden;pointer-events:none;z-index:-1}";
-  styleInject(css);
+  var css_248z = ".resize-observer[data-v-b329ee4c]{position:absolute;top:0;left:0;z-index:-1;width:100%;height:100%;border:none;background-color:transparent;pointer-events:none;display:block;overflow:hidden;opacity:0}.resize-observer[data-v-b329ee4c] object{display:block;position:absolute;top:0;left:0;height:100%;width:100%;overflow:hidden;pointer-events:none;z-index:-1}";
+  styleInject(css_248z);
 
   function install$1(Vue) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -7062,36 +6893,36 @@
     install$1.installed = true;
     var finalOptions = {};
     merge_1(finalOptions, defaultOptions, options);
+    if (options.rootNode) {
+      finalOptions.rootNode = options === null || options === void 0 ? void 0 : options.rootNode;
+      finalOptions.defaultRootNode = options === null || options === void 0 ? void 0 : options.rootNode;
+    }
     plugin$1.options = finalOptions;
     directive.options = finalOptions;
     Vue.directive('tooltip', directive);
     Vue.directive('close-popover', vclosepopover);
-    Vue.component('v-popover', Popover);
+    Vue.component('v-popover', __vue_component__);
   }
   var VTooltip = directive;
   var VClosePopover = vclosepopover;
-  var VPopover = Popover;
+  var VPopover = __vue_component__;
   var plugin$1 = {
     install: install$1,
-
     get enabled() {
       return state.enabled;
     },
-
     set enabled(value) {
       state.enabled = value;
     }
+  };
 
-  }; // Auto-install
-
+  // Auto-install
   var GlobalVue$1 = null;
-
   if (typeof window !== 'undefined') {
     GlobalVue$1 = window.Vue;
   } else if (typeof global !== 'undefined') {
     GlobalVue$1 = global.Vue;
   }
-
   if (GlobalVue$1) {
     GlobalVue$1.use(plugin$1);
   }
@@ -7106,4 +6937,4 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
