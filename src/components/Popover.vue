@@ -457,7 +457,7 @@ export default {
     $_findContainer (container, reference) {
       // if container is a query, get the relative element
       if (typeof container === 'string') {
-        container = window.document.querySelector(container)
+        container = directive.options.rootNode.querySelector(container)
       } else if (container === false) {
         // if container is `false`, set it to reference parent
         container = reference.parentNode

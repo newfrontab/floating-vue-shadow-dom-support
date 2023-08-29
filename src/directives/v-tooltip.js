@@ -51,6 +51,7 @@ export const defaultOptions = {
   defaultLoadingClass: 'tooltip-loading',
   // Displayed when tooltip content is loading
   defaultLoadingContent: '...',
+  defaultRootNode: document.body,
   // Hide on mouseover tooltip
   autoHide: true,
   // Close tooltip on click on tooltip target?
@@ -86,6 +87,7 @@ export const defaultOptions = {
 }
 
 export function getOptions (options) {
+
   const result = {
     placement: typeof options.placement !== 'undefined' ? options.placement : directive.options.defaultPlacement,
     delay: typeof options.delay !== 'undefined' ? options.delay : directive.options.defaultDelay,
@@ -101,6 +103,7 @@ export function getOptions (options) {
     hideOnTargetClick: typeof options.hideOnTargetClick !== 'undefined' ? options.hideOnTargetClick : directive.options.defaultHideOnTargetClick,
     loadingClass: typeof options.loadingClass !== 'undefined' ? options.loadingClass : directive.options.defaultLoadingClass,
     loadingContent: typeof options.loadingContent !== 'undefined' ? options.loadingContent : directive.options.defaultLoadingContent,
+    rootNode: typeof options.rootNode !== 'undefined' ? options.rootNode : directive.options.defaultRootNode,
     popperOptions: {
       ...(typeof options.popperOptions !== 'undefined' ? options.popperOptions : directive.options.defaultPopperOptions),
     },
@@ -127,7 +130,7 @@ export function getOptions (options) {
     result.hideOnTargetClick = false
   }
 
-  return result
+    return result
 }
 
 export function getPlacement (value, modifiers) {

@@ -6,12 +6,17 @@ import 'vue-resize/dist/vue-resize.css'
 
 export { createTooltip, destroyTooltip } from './directives/v-tooltip'
 
-export function install (Vue, options = {}) {
+export function install(Vue, options = {}) {
   if (install.installed) return
   install.installed = true
 
   const finalOptions = {}
+
   merge(finalOptions, defaultOptions, options)
+  if (options.rootNode) {
+    finalOptions.rootNode = options?.rootNode
+    finalOptions.defaultRootNode = options?.rootNode
+  }
 
   plugin.options = finalOptions
   vtooltip.options = finalOptions
@@ -27,14 +32,12 @@ export const VPopover = Popover
 
 const plugin = {
   install,
-
-  get enabled () {
+  get enabled() {
     return state.enabled
   },
-
-  set enabled (value) {
+  set enabled(value) {
     state.enabled = value
-  },
+  }
 }
 
 // Auto-install

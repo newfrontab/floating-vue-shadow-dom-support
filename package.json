@@ -1,10 +1,10 @@
 {
-  "name": "v-tooltip",
-  "version": "2.0.2",
-  "description": "Easy tooltips with Vue 2.x",
-  "author": "Guillaume Chau <guillaume.b.chau@gmail.com>",
+  "name": "@cling-se/v-tooltip-root-node",
+  "version": "0.1.2",
+  "description": "vTooltip with shadow dom support",
   "scripts": {
-    "build": "NODE_ENV=production npm run build:browser && npm run build:es && npm run build:umd",
+    "build": "SET NODE_ENV=production npm run build:browser && npm run build:es && npm run build:umd",
+    "buildMacOs": "NODE_ENV=production npm run build:browser && npm run build:es && npm run build:umd",
     "test": "npm run test:unit",
     "build:browser": "rollup --config build/rollup.config.browser.js",
     "build:es": "rollup --config build/rollup.config.es.js",
@@ -12,7 +12,7 @@
     "demo:build": "vue-cli-service build",
     "demo:serve": "vue-cli-service serve",
     "dev": "cross-env NODE_ENV=development rollup --config build/rollup.config.es.js --watch",
-    "prepublishOnly": "npm run test && npm run build",
+    "prepublishOnly": "npm run build",
     "test:unit": "vue-cli-service test:unit"
   },
   "main": "dist/v-tooltip.umd.js",
@@ -72,17 +72,15 @@
     "> 1%",
     "last 2 versions"
   ],
-  "bugs": {
-    "url": "https://github.com/Akryum/vue-tooltip/issues"
-  },
-  "homepage": "https://github.com/Akryum/vue-tooltip#readme",
   "keywords": [
     "vue",
-    "tooltip"
+    "tooltip",
+    "shadowdom"
   ],
   "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Akryum/vue-tooltip.git"
-  }
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "author": "jonathan"
 }

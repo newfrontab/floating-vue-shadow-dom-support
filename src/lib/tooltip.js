@@ -11,9 +11,9 @@ const DEFAULT_OPTIONS = {
   placement: 'top',
   title: '',
   template:
-        '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
+    '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
   trigger: 'hover focus',
-  offset: 0,
+  offset: 0
 }
 
 const openTooltips = []
@@ -52,7 +52,7 @@ export default class Tooltip {
    *      [options docs](https://popper.js.org/popper-documentation.html)
    * @return {Object} instance - The generated tooltip instance
    */
-  constructor (reference, options) {
+  constructor(reference, options) {
     // apply user options over default ones
     options = { ...DEFAULT_OPTIONS, ...options }
 
@@ -81,7 +81,7 @@ export default class Tooltip {
    * @method Tooltip#show
    * @memberof Tooltip
    */
-  show () {
+  show() {
     this._show(this.reference, this.options)
   }
 
@@ -90,7 +90,7 @@ export default class Tooltip {
    * @method Tooltip#hide
    * @memberof Tooltip
    */
-  hide () {
+  hide() {
     this._hide()
   }
 
@@ -99,7 +99,7 @@ export default class Tooltip {
    * @method Tooltip#dispose
    * @memberof Tooltip
    */
-  dispose () {
+  dispose() {
     this._dispose()
   }
 
@@ -108,7 +108,7 @@ export default class Tooltip {
    * @method Tooltip#toggle
    * @memberof Tooltip
    */
-  toggle () {
+  toggle() {
     if (this._isOpen) {
       return this.hide()
     } else {
@@ -116,20 +116,21 @@ export default class Tooltip {
     }
   }
 
-  setClasses (classes) {
+  setClasses(classes) {
     this._classes = classes
   }
 
-  setContent (content) {
+  setContent(content) {
     this.options.title = content
     if (this._tooltipNode) {
       this._setContent(content, this.options)
     }
   }
 
-  setOptions (options) {
+  setOptions(options) {
     let classesUpdated = false
-    const classes = (options && options.classes) || directive.options.defaultClass
+    const classes =
+      (options && options.classes) || directive.options.defaultClass
     if (this._classes !== classes) {
       this.setClasses(classes)
       classesUpdated = true
@@ -142,7 +143,7 @@ export default class Tooltip {
 
     if (
       this.options.offset !== options.offset ||
-            this.options.placement !== options.placement
+      this.options.placement !== options.placement
     ) {
       needPopperUpdate = true
     }
@@ -182,11 +183,12 @@ export default class Tooltip {
 
   _events = []
 
-  _init () {
+  _init() {
     // get events list
-    let events = typeof this.options.trigger === 'string'
-      ? this.options.trigger.split(' ')
-      : []
+    let events =
+      typeof this.options.trigger === 'string'
+        ? this.options.trigger.split(' ')
+        : []
     this._isDisposed = false
     this._enableDocumentTouch = events.indexOf('manual') === -1
 
@@ -213,7 +215,7 @@ export default class Tooltip {
    * @param {Boolean} allowHtml
    * @return {HTMLelement} tooltipNode
    */
-  _create (reference, template) {
+  _create(reference, template) {
     // create tooltip element
     const tooltipGenerator = window.document.createElement('div')
     tooltipGenerator.innerHTML = template.trim()
@@ -236,14 +238,14 @@ export default class Tooltip {
     return tooltipNode
   }
 
-  _setContent (content, options) {
+  _setContent(content, options) {
     this.asyncContent = false
     this._applyContent(content, options).then(() => {
       this.popperInstance.update()
     })
   }
 
-  _applyContent (title, options) {
+  _applyContent(title, options) {
     return new Promise((resolve, reject) => {
       const allowHtml = options.html
       const rootNode = this._tooltipNode
@@ -266,26 +268,31 @@ export default class Tooltip {
           if (options.loadingContent) {
             this._applyContent(options.loadingContent, options)
           }
-          result.then(asyncResult => {
-            options.loadingClass && removeClasses(rootNode, options.loadingClass)
-            return this._applyContent(asyncResult, options)
-          }).then(resolve).catch(reject)
+          result
+            .then(asyncResult => {
+              options.loadingClass &&
+                removeClasses(rootNode, options.loadingClass)
+              return this._applyContent(asyncResult, options)
+            })
+            .then(resolve)
+            .catch(reject)
         } else {
-          this._applyContent(result, options)
-            .then(resolve).catch(reject)
+          this._applyContent(result, options).then(resolve).catch(reject)
         }
         return
       } else {
         // if it's just a simple text, set innerText or innerHtml depending by `allowHtml` value
-        allowHtml ? (titleNode.innerHTML = title) : (titleNode.innerText = title)
+        allowHtml
+          ? (titleNode.innerHTML = title)
+          : (titleNode.innerText = title)
       }
       resolve()
     })
   }
 
-  _show (reference, options) {
+  _show(reference, options) {
     if (options && typeof options.container === 'string') {
-      const container = document.querySelector(options.container)
+      const container = this.options.rootNode.querySelector(options.container)
       if (!container) return
     }
 
@@ -311,7 +318,7 @@ export default class Tooltip {
     return result
   }
 
-  _ensureShown (reference, options) {
+  _ensureShown(reference, options) {
     // don't show if it's already visible
     if (this._isOpen) {
       return this
@@ -341,10 +348,7 @@ export default class Tooltip {
     }
 
     // create tooltip node
-    const tooltipNode = this._create(
-      reference,
-      options.template
-    )
+    const tooltipNode = this._create(reference, options.template)
     this._tooltipNode = tooltipNode
 
     // Add `aria-describedby` to our reference element for accessibility reasons
@@ -357,19 +361,19 @@ export default class Tooltip {
 
     const popperOptions = {
       ...options.popperOptions,
-      placement: options.placement,
+      placement: options.placement
     }
 
     popperOptions.modifiers = {
       ...popperOptions.modifiers,
       arrow: {
-        element: this.options.arrowSelector,
-      },
+        element: this.options.arrowSelector
+      }
     }
 
     if (options.boundariesElement) {
       popperOptions.modifiers.preventOverflow = {
-        boundariesElement: options.boundariesElement,
+        boundariesElement: options.boundariesElement
       }
     }
 
@@ -398,14 +402,14 @@ export default class Tooltip {
     return this
   }
 
-  _noLongerOpen () {
+  _noLongerOpen() {
     const index = openTooltips.indexOf(this)
     if (index !== -1) {
       openTooltips.splice(index, 1)
     }
   }
 
-  _hide (/* reference, options */) {
+  _hide(/* reference, options */) {
     // don't hide if it's already hidden
     if (!this._isOpen) {
       return this
@@ -438,7 +442,7 @@ export default class Tooltip {
     return this
   }
 
-  _removeTooltipNode () {
+  _removeTooltipNode() {
     if (!this._tooltipNode) return
     const parentNode = this._tooltipNode.parentNode
     if (parentNode) {
@@ -448,7 +452,7 @@ export default class Tooltip {
     this._tooltipNode = null
   }
 
-  _dispose () {
+  _dispose() {
     this._isDisposed = true
 
     this.reference.removeAttribute('data-original-title')
@@ -481,10 +485,10 @@ export default class Tooltip {
     return this
   }
 
-  _findContainer (container, reference) {
+  _findContainer(container, reference) {
     // if container is a query, get the relative element
     if (typeof container === 'string') {
-      container = window.document.querySelector(container)
+      container = this.options.rootNode.querySelector(container)
     } else if (container === false) {
       // if container is `false`, set it to reference parent
       container = reference.parentNode
@@ -499,11 +503,11 @@ export default class Tooltip {
    * @param {HTMLElement} tooltip
    * @param {HTMLElement|String|false} container
    */
-  _append (tooltipNode, container) {
+  _append(tooltipNode, container) {
     container.appendChild(tooltipNode)
   }
 
-  _setEventListeners (reference, events, options) {
+  _setEventListeners(reference, events, options) {
     const directEvents = []
     const oppositeEvents = []
 
@@ -552,20 +556,28 @@ export default class Tooltip {
     })
   }
 
-  _onDocumentTouch (event) {
+  _onDocumentTouch(event) {
     if (this._enableDocumentTouch) {
-      this._scheduleHide(this.reference, this.options.delay, this.options, event)
+      this._scheduleHide(
+        this.reference,
+        this.options.delay,
+        this.options,
+        event
+      )
     }
   }
 
-  _scheduleShow (reference, delay, options /*, evt */) {
+  _scheduleShow(reference, delay, options /*, evt */) {
     // defaults to 0
     const computedDelay = (delay && delay.show) || delay || 0
     clearTimeout(this._scheduleTimer)
-    this._scheduleTimer = window.setTimeout(() => this._show(reference, options), computedDelay)
+    this._scheduleTimer = window.setTimeout(
+      () => this._show(reference, options),
+      computedDelay
+    )
   }
 
-  _scheduleHide (reference, delay, options, evt) {
+  _scheduleHide(reference, delay, options, evt) {
     // defaults to 0
     const computedDelay = (delay && delay.hide) || delay || 0
     clearTimeout(this._scheduleTimer)
@@ -573,7 +585,8 @@ export default class Tooltip {
       if (this._isOpen === false) {
         return
       }
-      if (!document.body.contains(this._tooltipNode)) {
+
+      if (!this.options.rootNode.contains(this._tooltipNode)) {
         return
       }
 
@@ -594,10 +607,12 @@ export default class Tooltip {
   }
 
   _setTooltipNodeEvent = (evt, reference, delay, options) => {
-    const relatedreference = evt.relatedreference || evt.toElement || evt.relatedTarget
+    const relatedreference =
+      evt.relatedreference || evt.toElement || evt.relatedTarget
 
     const callback = evt2 => {
-      const relatedreference2 = evt2.relatedreference || evt2.toElement || evt2.relatedTarget
+      const relatedreference2 =
+        evt2.relatedreference || evt2.toElement || evt2.relatedTarget
 
       // Remove event listener after call
       this._tooltipNode.removeEventListener(evt.type, callback)
@@ -621,14 +636,20 @@ export default class Tooltip {
 
 // Hide tooltips on touch devices
 if (typeof document !== 'undefined') {
-  document.addEventListener('touchstart', event => {
-    for (let i = 0; i < openTooltips.length; i++) {
-      openTooltips[i]._onDocumentTouch(event)
-    }
-  }, supportsPassive ? {
-    passive: true,
-    capture: true,
-  } : true)
+  document.addEventListener(
+    'touchstart',
+    event => {
+      for (let i = 0; i < openTooltips.length; i++) {
+        openTooltips[i]._onDocumentTouch(event)
+      }
+    },
+    supportsPassive
+      ? {
+          passive: true,
+          capture: true
+        }
+      : true
+  )
 }
 
 /**
